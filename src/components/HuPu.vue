@@ -54,7 +54,7 @@
             <span id="none_data" v-if="none_data_key">当前页面暂时没有数据,请添加监控关键词或等待爬虫爬取数据</span>
             <div class="page_controller">
                     <a href="#anchor" @click="first_page" class="a_button">首页</a>
-                    <button @clic" v-show="page_show !=10"><上一页</button> 
+                    <button @click="pre_page" v-show="page_show !=10"><上一页</button> 
                     <a href="#anchor" v-for="(page,index) in max_page" v-show="index+1<=page_show&&index+1>page_show-10" class="page_number"
                             :class="{BG_light:index==lighted}" @click="change_Bg(index)">{{page}}</a>
                     <button class="next_page" @click="next_page" v-show="(max_page.length-page_show)>0">下一页></button>
