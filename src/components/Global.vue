@@ -1,5 +1,5 @@
 <script>
-    const url = 'http://139.199.66.15:8000';
+    const url = 'http://127.0.0.1:8000';
     const headers = {
         headers:{'Authorization':window.sessionStorage.token}
     };
