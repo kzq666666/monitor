@@ -34,13 +34,13 @@
                     <div class="child_account" v-for="(item, index) in child_accounts" :key="index">
                         <span class="key_text">子账号{{index+1}}</span>
                         <span class="value_text account_text">{{item.username}}</span>
+                        <button @click="enter_accInfo(item.username)" id="account_infoB">查询</button>
                         <button @click="del_account(item.username)" id="del_account">删除</button>
                     </div>
                     <div class="add_button">
                         <button @click="show_con">添加子账号</button>
                     </div>
                 </div>
-
             </div>
             <div class="add_account_page" v-show="key">
                 <h2>添加子账号</h2>
@@ -50,6 +50,35 @@
                 <button @click="add_account">添加</button>
                 <button class="cancle" @click="cancle">取消</button>
             </div>
+            <div class="acc_info" v-show="acc_infoKey">
+                <span @click="back_infoPage" class="back_infoPage">返回</span>
+                <span>/</span>
+                <span class="acc_username">{{acc_username}}的登录信息</span>
+                <div class="detail_con">
+                    <table border="1">
+                        <tr class="tab_title">
+                            <th>次数</th>
+                            <th>登录时间</th>
+                            <th>登录IP</th>
+                            <th>登录地点</th>
+                        </tr>
+                        <tr v-for="(item, index) in account_loginInfo" :key="index" class="info_detail">
+                            <th>{{(active_keynumber*20)+index+1}}</th>
+                            <th>{{new Date(item.login_time*1000).toLocaleString()}}</th>
+                            <th>{{item.login_ip}}</th>
+                            <th>{{item.login_city}}</th>
+                        </tr>
+                    </table>
+                    <div class="page_control"  v-show="account_loginInfo.length">
+                        <button @click="acc_first_page">首页</button>
+                        <button @click="prePage" v-if="max_page!=10">上一页</button>
+                        <button :class="{active:index==active_keynumber}"  v-show = "index+1<=max_page&(index+1)>max_page-10" v-for="(item,index) in page" @click=get_page(acc_username,index+1)>{{(index+1)}}</button>
+                        <button @click="nextPage" v-if="max_page<=page[page.length-1]">下一页</button>
+                        <button @click="acc_last_page">尾页</button>
+                    </div>
+                    <div class="none_login" v-show="!account_loginInfo.length">该用户未登录过</div>
+                </div>                
+            </div>
         </div>
     </div>
 </template>
@@ -58,6 +87,8 @@
     export default {
         data() {
             return {
+                // 控制查询子账号页面显示的key
+                acc_infoKey: false,
                 key: false,
                 root_authority: '',
                 url: this.GLOBAL.url,
@@ -67,6 +98,15 @@
                 last_loginT: window.localStorage.logout_time,
                 confirm_pwd: '',
                 child_accounts: '',
+                page: [],
+                //当前页码最大值
+                max_page:10,
+                //当前页码背景高亮
+                active_keynumber: 0,
+                //子账号名
+                acc_username:'',
+                //子账号登录信息
+                account_loginInfo: '',
                 subaccount: {
                     username: '',
                     password: ''
@@ -125,6 +165,48 @@
                         }
                     )
                 }
+            },
+            //获取子账号的登录信息页数
+            get_page(username,page){
+                this.active_keynumber = page-1;
+                this.$http.get(this.url + '/api/user/loginrecord/' + username + '/'+page, this.headers).then(
+                    (res) => {
+                        this.account_loginInfo = res.data.data;
+                    }
+                )
+            },
+            //查看子账号的登录时间
+            enter_accInfo(username) {
+                this.page = [];
+                this.max_page = 10;
+                this.active_keynumber = 0;
+                this.acc_username = username;
+                this.acc_infoKey = true;
+                this.$http.get(this.url + '/api/user/loginrecord/' + username + '/1', this.headers).then(
+                    (res) => {
+                        this.account_loginInfo = res.data.data;
+                        for (let i = 0; i < res.data.pages; i++) {
+                            this.page.push(i + 1);
+                        }
+                    }
+                )
+            },
+            back_infoPage() {
+                this.acc_infoKey = false;
+            },
+            acc_first_page() {
+                this.get_page(this.acc_username,1);
+                this.max_page = 10;
+            },
+            acc_last_page() {
+                this.get_page(this.acc_username,this.page[this.page.length-1]);
+                this.max_page = Math.ceil(this.page[this.page.length-1]/10)*10
+            },
+            nextPage(){
+                this.max_page += 10;
+            },
+            prePage(){
+                this.max_page += -10;
             }
         },
         created() {
@@ -254,7 +336,7 @@
 
     .account_text {
         display: inline-block;
-        width: 16%;
+        width: 14%;
     }
 
     #del_account {
@@ -263,7 +345,81 @@
         height: 30px;
         font-size: 15px;
     }
-    #root_con{
+
+    #account_infoB {
+        width: 60px;
+        height: 30px;
+        font-size: 15px;
+        margin-right: 10px;
+    }
+
+    #root_con {
         margin-top: -20px;
+    }
+
+    .acc_info {
+        position: absolute;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        padding-top: 5px;
+        background: #f5f5f5;
+    }
+
+    .detail_con {
+        width: 100%;
+        height:98%;
+        overflow: scroll;
+    }
+
+    .acc_info .back_infoPage {
+        cursor: pointer;
+        color: firebrick;
+        padding-left: 10px;
+
+    }
+
+    .acc_info .acc_username{
+        color:red;
+        font-weight: bold;
+        
+    }
+    .acc_info .none_login {
+        text-align: center;
+        color: red;
+        font-size: 25px;
+        margin: 100px;
+    }
+
+    table {
+        margin-top: 10px;
+        width: 100%;
+        border: 1;
+        border-collapse:collapse;
+    }
+    th{
+        border-bottom: 1px solid black;
+    }
+    .acc_info .tab_title th {
+        width: 25%;
+    }
+
+    .page_control {
+        position: absolute;
+        width: 100%;
+        text-align: center;
+        margin-bottom: 10px;
+        bottom: 0;
+    }
+
+    .page_control button {
+        width: 60px;
+        height: 30px;
+        margin: 10px;
+        line-height: 30px;
+        opacity: 0.6;
+    }
+    .active{
+        background: red;
     }
 </style>

@@ -85,7 +85,7 @@
                 lighted: 0,
                 end_date: '',
                 key: false,
-                none_data_key:false,
+                none_data_key: false,
                 //控制页码显示的参数
                 page_show: 10,
                 update_form: {
@@ -102,7 +102,7 @@
                     (res) => {
                         this.data = res.data.data;
                         this.len = res.data.pages;
-                        if(this.len==0){
+                        if (this.len == 0) {
                             this.none_data_key = true;
                         }
                         if (!this.max_page[0]) {
@@ -413,7 +413,7 @@
 
     }
 
-     #none_data{
+    #none_data {
         display: block;
         margin: 200px auto;
         font-size: 30px;

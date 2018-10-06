@@ -41,7 +41,7 @@ export const routes = [
             { path: '/main/system/hupu', component: HuPu },
             { path: '/main/system/hupu/setting', component: HuPu_setting },
         ]
-    }
+    },
 ]
 
 

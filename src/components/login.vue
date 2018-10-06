@@ -26,35 +26,25 @@
         methods: {
             login: function () {
                 var login_time = new Date();
-                this.$http.post(this.GLOBAL.url+'/api/user/token', this.loginForm).then(
-                     (response) =>{
+                this.$http.post(this.GLOBAL.url + '/api/user/token', this.loginForm).then(
+                    (response) => {
                         if (response.data['code'] == 0) {
-                            window.sessionStorage.setItem('token',response.data['token']) 
-                            window.sessionStorage.setItem('user_name',this.loginForm.username)
-                            this.GLOBAL.headers.headers = {'Authorization':window.sessionStorage.token}
-                            localStorage.setItem("login_time",login_time.toLocaleString());
+                            window.sessionStorage.setItem('token', response.data['token'])
+                            window.sessionStorage.setItem('user_name', this.loginForm.username)
+                            this.GLOBAL.headers.headers = { 'Authorization': window.sessionStorage.token }
+                            localStorage.setItem("login_time", login_time.toLocaleString());
                             this.$router.push('/main');
-                        }else{
+                        } else {
                             alert('用户名和密码错误');
                         }
                     }
                 )
             },
-            register(){
+            register() {
                 this.$router.push('/register')
             }
         }
     }
-
-
-
-
-
-
-
-
-
-
 </script>
 <style>
     .login-container {
@@ -105,9 +95,10 @@
         cursor: pointer;
         line-height: 20px;
     }
-    .register{
+
+    .register {
         position: absolute;
-        right:  187px;
+        right: 187px;
         bottom: 20px;
         cursor: pointer;
     }
