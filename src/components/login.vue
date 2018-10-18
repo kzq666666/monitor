@@ -43,7 +43,12 @@
             register() {
                 this.$router.push('/register')
             }
-        }
+        },
+        created() {
+            if(window.sessionStorage.token){
+                this.$router.push('/main')
+            }
+        },
     }
 </script>
 <style>
