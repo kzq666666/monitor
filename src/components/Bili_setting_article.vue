@@ -18,7 +18,7 @@
         </div>
         <div class="add_video">
             <span class="header">添加自定义文章</span>
-            <div class="add_video_id">添加文章:<input type="number" placeholder="请输入B站文章id" v-model="add_form.video_id"></div>
+            <div class="add_article_id">添加文章:<input type="number" placeholder="请输入B站文章id" v-model="add_form.article_id"></div>
             <div>截止时间:<input type="date" id="input_date" v-model="add_form.end_time"></div>
             <div>最大阀值:<input type="number" placeholder="请输入最大阀值" v-model="add_form.max"></div>
             <div>
@@ -28,10 +28,10 @@
         <div class="reset">
             <span class="header">重置阀值和天数</span>
             <div>重置默认阀值:
-                <input type="number" :placeholder="'当前默认为'+de_max_play" v-model="reset_form.bilibili_default_max_play">
+                <input type="number" :placeholder="'当前默认为'+de_max_reply" v-model="reset_form.bilibili_article_max_reply">
             </div>
             <div>重置默认天数:
-                <input type="number" :placeholder="'当前默认为'+de_end_time+'天'" v-model="reset_form.bilibili_default_end_time">
+                <input type="number" :placeholder="'当前默认为'+de_end_time+'天'" v-model="reset_form.bilibili_article_end_time">
             </div>
             <div>
                 <button @click='reset'>确定重置</button>
@@ -46,20 +46,21 @@
             return {
                 url: this.GLOBAL.url,
                 headers: this.GLOBAL.headers,
-                de_max_play: '',
+                de_max_reply: '',
                 de_end_time: '',
                 end_date: '',
+                //存放初始化页面时获取的文章关键词
                 keyword: '',
                 add_keyword: '',
                 need_addemail: '',
                 add_form: {
-                    video_id: '',
+                    article_id: '',
                     end_time: '',
                     max: ''
                 },
                 reset_form: {
-                    bilibili_default_max_play: '',
-                    bilibili_default_end_time: ''
+                    bilibili_article_max_reply: '',
+                    bilibili_article_end_time: ''
                 }
             }
         },
@@ -68,21 +69,22 @@
                 this.$router.push('/main/system/bilibili')
             },
             add_BiliV() {
-                if (!this.add_form.video_id) {
+                if (!this.add_form.article_id) {
                     alert('请输入B站文章id')
                 } else if (!this.add_form.end_time) {
                     alert('请输入截止时间')
                 } else if (!this.add_form.max) {
                     alert('请输入阀值')
                 }
-                if (this.add_form.video_id && this.add_form.end_time && this.add_form.max) {
+                if (this.add_form.article_id && this.add_form.end_time && this.add_form.max) {
                     this.add_form.end_time = (new Date(this.add_form.end_time).getTime()) / 1000;
-                    this.$http.post(this.url + '/api/bilibili/uservideo', this.add_form, this.headers).then(
+                    this.$http.post(this.url + '/api/bilibili/userarticle', this.add_form, this.headers).then(
                         (res) => {
                             if (res.data.code == 0) {
                                 alert('文章添加成功');
+                                this.$router.go(0);
                             } else {
-                                alert('添加失败,请确定微博id是否存在或已经添加过了')
+                                alert('添加失败,请确定文章id是否存在或已经添加过了')
                             }
                         }
 
@@ -90,12 +92,13 @@
                 }
             },
             reset() {
-                this.reset_form.bilibili_default_max_play = this.reset_form.bilibili_default_max_play == '' ? this.de_max_play : this.reset_form.bilibili_default_max_play
-                this.reset_form.bilibili_default_end_time = this.reset_form.bilibili_default_end_time == '' ? this.de_end_time : this.reset_form.bilibili_default_end_time
+                this.reset_form.bilibili_article_max_reply = this.reset_form.bilibili_article_max_reply == '' ? this.de_max_reply : this.reset_form.bilibili_article_max_reply
+                this.reset_form.bilibili_article_end_time = this.reset_form.bilibili_article_end_time == '' ? this.de_end_time : this.reset_form.bilibili_article_end_time
                 this.$http.put(this.url + '/api/user/defaultset', this.reset_form, this.headers).then(
                     (res) => {
                         if (res.data.code == 0) {
                             alert('重置成功');
+                            this.$router.go(0);
                         } else {
                             alert('重置失败')
                         }
@@ -103,7 +106,7 @@
                 )
             },
             switch_keyword(item) {
-                this.$http.put(this.url + '/api/bilibili/keyword', { "name": item.keyword, "status": item.status }, this.headers).then(
+                this.$http.put(this.url + '/api/bilibili/articlekeyword', { "name": item.keyword, "status": item.status }, this.headers).then(
                     function (res) {
                         if (res.data.code = 'ok') {
                             item.status = item.status == 0 ? 1 : 0;
@@ -119,7 +122,7 @@
                 if (mksure == true) {
                     this.$http({
                         method: 'delete',
-                        url: this.url + '/api/bilibili/keyword',
+                        url: this.url + '/api/bilibili/articlekeyword',
                         headers: {
                             'Authorization': window.sessionStorage.token
                         },
@@ -140,7 +143,7 @@
             },
             sure_addkeyword() {
                 if (this.add_keyword) {
-                    this.$http.post(this.url + '/api/bilibili/keyword', { "name": this.add_keyword }, this.headers).then(
+                    this.$http.post(this.url + '/api/bilibili/articlekeyword', { "name": this.add_keyword }, this.headers).then(
                         (res) => {
                             if (res.data.code == 0) {
                                 alert('添加关键词成功');
@@ -159,11 +162,11 @@
         created() {
             this.$http.get(this.url + '/api/user/defaultset', this.headers).then(
                 (res) => {
-                    this.de_max_play = res.data.data.bilibili_default_max_play;
-                    this.de_end_time = res.data.data.bilibili_default_end_time;
+                    this.de_max_reply = res.data.data.bilibili_article_max_reply;
+                    this.de_end_time = res.data.data.bilibili_article_end_time;
                 }
             )
-            this.$http.get(this.url + '/api/bilibili/keyword', this.headers).then(
+            this.$http.get(this.url + '/api/bilibili/articlekeyword', this.headers).then(
                 (res) => {
                     this.keyword = res.data.data;
                 }

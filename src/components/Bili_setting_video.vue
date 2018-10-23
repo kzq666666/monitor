@@ -82,7 +82,7 @@
                             if (res.data.code == 0) {
                                 alert('视频添加成功');
                             } else {
-                                alert('添加失败,请确定微博id是否存在或已经添加过了')
+                                alert('添加失败,请确定视频id是否存在或已经添加过了')
                             }
                         }
 
@@ -96,6 +96,7 @@
                     (res) => {
                         if (res.data.code == 0) {
                             alert('重置成功');
+                            this.$router.go(0);
                         } else {
                             alert('重置失败')
                         }

@@ -9,7 +9,7 @@
                 <button class="video" :class="{active:module=='video'}" @click="Video_md">视频</button>
             </router-link>
             <router-link to="/main/system/bili_article">
-                <button class="acticle" :class="{active:module=='acticle'}" @click="Acticle_md">文章</button>
+                <button class="acticle" :class="{active:module=='article'}"  @click="Acticle_md">文章</button>
             </router-link>
             <div class="bili_setting" @click="goSetting">
                 <img src="../assets/setting.png" alt="">系统设置
@@ -39,7 +39,14 @@
             },
             //点击进入文章模块
             Acticle_md() {
-                this.module = 'acticle'
+                this.module = 'article'
+            }
+        },
+        created() {
+            if (this.$router.history.current.fullPath == '/main/system/bili_article') {
+                this.module = 'article'
+            } else {
+                this.module = 'video'
             }
         }
     }

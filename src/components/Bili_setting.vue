@@ -31,6 +31,13 @@
             back: function () {
                 this.$router.push('/main/system/bilibili')
             },
+        },
+        created () {
+            if (this.$router.history.current.fullPath == '/main/system/bilibili/article_setting') {
+                this.cur_setting = 'article'
+            } else {
+                this.cur_setting = 'video'
+            }
         }
     }
 </script>

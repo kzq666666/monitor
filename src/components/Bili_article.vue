@@ -2,37 +2,33 @@
     <div>
         <div class="box">
             <div class="box_item" v-for="(item, index) in data" :key="index">
-                <a :href=item.arcurl target="_blank">
+                <a :href=item.url target="_blank">
                     <div class="title" v-html="item.title">
                     </div>
                 </a>
                 <div class="id bulebule">
                     <span class="key">id:</span>
-                    <span>{{item.video_id}}</span>
+                    <span>{{item.article_id}}</span>
                 </div>
                 <div class="play bulebule">
-                    <span class="key">播放量:</span>
-                    <span class="play_value">{{item.play}}</span>
+                    <span class="key">评论数:</span>
+                    <span class="play_value">{{item.reply}}</span>
                 </div>
                 <div class="max_play bulebule">
                     <span class="key">阀值:</span>
-                    <span>{{item.max_play}}</span>
+                    <span>{{item.max_reply}}</span>
                 </div>
                 <div class="keyword bulebule">
                     <span class="key">关键词:</span>
                     <span class="keyword_value">{{item.keyword}}</span>
                 </div>
                 <div class="pubdate bulebule">
-                    <span class="key">发布时间:</span>
-                    <span>{{new Date(item.pubdate*1000).toLocaleString()}}</span>
-                </div>
-                <div class="pubdate bulebule">
                     <span class="key">监控时间:</span>
-                    <span>{{new Date(item.pubdate*1000).toLocaleString()}}----{{new
+                    <span>{{new Date(item.start_time*1000).toLocaleString()}}----{{new
                         Date(item.end_time*1000).toLocaleString()}}</span>
                 </div>
                 <div class="controller bulebule">
-                    <button class="delete" @click="delItem(index,item.video_id)">删除</button>
+                    <button class="delete" @click="delItem(index,item.article_id)">删除</button>
                     <button class="update" @click="show_update_content(item)">更新</button>
                 </div>
             </div>
@@ -51,7 +47,7 @@
             </div>
             <div class="max_play_con">
                 <span>阀值:</span>
-                <input type="text" v-model="update_form.max_play" placeholder="请输入新的阀值">
+                <input type="text" v-model="update_form.max" placeholder="请输入新的阀值">
             </div>
             <div class="date">
                 <span>监控结束日期:</span>
@@ -83,8 +79,8 @@
                 //控制页码显示的参数
                 page_show: 10,
                 update_form: {
-                    video_id: '',
-                    max_play: '',
+                    article_id: '',
+                    max: '',
                     end_time: ''
                 },
                 item: {},
@@ -94,7 +90,7 @@
         },
         methods: {
             get_page(page) {
-                this.$http.get(this.url + '/api/bilibili/uservideo/' + page, this.headers).then(
+                this.$http.get(this.url + '/api/bilibili/userarticle/' + page, this.headers).then(
                     (res) => {
                         this.data = res.data.data;
                         this.len = res.data.pages;
@@ -114,17 +110,17 @@
                 this.lighted = index;
                 this.get_page(index + 1);
             },
-            delItem(index, video_id) {
+            delItem(index, article_id) {
                 let confm = confirm('确定删除吗');
                 if (confm == true) {
                     this.$http({
                         method: 'delete',
-                        url: this.url + '/api/bilibili/uservideo',
+                        url: this.url + '/api/bilibili/userarticle',
                         headers: {
                             'Authorization': window.sessionStorage.token
                         },
                         data: {
-                            "video_id": video_id
+                            "article_id": article_id
                         }
                     }).then(
                         (res) => {
@@ -145,14 +141,14 @@
             update_data() {
                 let day = new Date(this.end_date);
                 this.update_form.end_time = day.getTime() / 1000;
-                this.update_form.video_id = this.item.video_id;
+                this.update_form.article_id = this.item.article_id;
                 this.key = false;
-                this.$http.put(this.url + '/api/bilibili/uservideo', this.update_form, this.headers).then(
+                this.$http.put(this.url + '/api/bilibili/userarticle', this.update_form, this.headers).then(
                     (res) => {
                         if (res.data.code == 0) {
                             alert('数据完成更新');
                             this.item.end_time = this.update_form.end_time;
-                            this.item.max_play = this.update_form.max_play;
+                            this.item.max_reply = this.update_form.max;
                         } else {
                             alert('数据更新失败');
 
