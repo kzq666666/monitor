@@ -9,6 +9,17 @@
                 <img src="../assets/setting.png" alt="">系统设置
             </div>
         </div>
+        <div class="sort_list" v-if="!none_data_key">
+            <div @click=sortDefault :class="{active:sortby=='default'}">
+                <span>默认</span><img src="../assets/sort.png">
+            </div>
+            <div @click=sortCommentCount :class="{active:sortby=='comment_count'}">
+                <span>评论数</span><img src="../assets/sort.png">
+            </div>
+            <div @click=sortEndTime :class="{active:sortby=='end_time'}">
+                <span>截止时间</span><img src="../assets/sort.png">
+            </div>
+        </div>
         <div class="box">
             <div class="box_item" v-for="(item,index) in data" :key="index">
                 <a :href=item.post_url target="_blank">
@@ -18,13 +29,14 @@
                     <span class="key">post_id:</span>
                     <span>{{item.post_id}}</span>
                 </div>
+                <div class="comment">
+                    <span class="key">评论数:</span>
+                    <span class="comment_value">{{item.post_comment_count}}</span>
+                </div>
                 <div class="post_views">
                     <span class="key">浏览量:</span>
                     <span class="comment_value">{{item.post_views}}</span>
                 </div>
-                <div class="comment">
-                    <span class="key">评论数:</span>
-                    <span class="comment_value">{{item.post_comment_count}}</span></div>
                 <div class="max_comment">
                     <span class="key">阀值:</span>
                     <span>{{item.max_comment}}</span>
@@ -53,16 +65,16 @@
             </div>
             <span id="none_data" v-if="none_data_key">当前页面暂时没有数据,请添加监控关键词或等待爬虫爬取数据</span>
             <div class="page_controller">
-                    <a href="#anchor" @click="first_page" class="a_button">首页</a>
-                    <button @click="pre_page" v-show="page_show !=10"><上一页</button> 
-                    <a href="#anchor" v-for="(page,index) in max_page" v-show="index+1<=page_show&&index+1>page_show-10" class="page_number"
-                            :class="{BG_light:index==lighted}" @click="change_Bg(index)">{{page}}</a>
-                    <button class="next_page" @click="next_page" v-show="(max_page.length-page_show)>0">下一页></button>
-                    <a href="#anchor" @click="last_page" class="a_button">尾页</a>
-                </div>
+                <a href="#anchor" @click="first_page" class="a_button">首页</a>
+                <button @click="pre_page" v-show="page_show !=10">
+                    <上一页</button> <a href="#anchor" v-for="(page,index) in max_page" v-show="index+1<=page_show&&index+1>page_show-10"
+                        class="page_number" :class="{BG_light:index==lighted}" @click="change_Bg(index)">{{page}}</a>
+                        <button class="next_page" @click="next_page" v-show="(max_page.length-page_show)>0">下一页></button>
+                        <a href="#anchor" @click="last_page" class="a_button">尾页</a>
+            </div>
         </div>
         <div class="update_content" v-show="key">
-            <div class="title"  v-html="item.post_title">
+            <div class="title" v-html="item.post_title">
             </div>
             <div class="max_comment_con">
                 <span>阀值:</span>
@@ -77,7 +89,7 @@
                 <button @click="exit_update">取消</button>
             </div>
         </div>
-        
+
     </div>
 </template>
 
@@ -98,9 +110,9 @@
                 max_page: [],
                 //控制更新数据页面的显示
                 key: false,
-                none_data_key:false,
+                none_data_key: false,
                 //存放更新数据的item
-                item:'',
+                item: '',
                 //控制页码显示的参数
                 page_show: 10,
                 //更新数据的表单
@@ -109,6 +121,8 @@
                     max_comment: '',
                     end_time: ''
                 },
+                //排序方式
+                sortby: 'default'
             }
         },
         methods: {
@@ -116,13 +130,29 @@
             Go_setting() {
                 this.$router.push('/main/system/hupu/setting')
             },
+            //排序
+            sortDefault() {
+                this.sortby = 'default'
+                this.get_page(1);
+                this.lighted = 0;
+            },
+            sortCommentCount() {
+                this.sortby = 'comment_count'
+                this.get_page(1);
+                this.lighted = 0;
+            },
+            sortEndTime() {
+                this.sortby = 'end_time';
+                this.get_page(1);
+                this.lighted = 0;
+            },
             //获取某一页的数据
             get_page(page) {
-                this.$http.get(this.url + '/api/hupu/userpost/' + page, this.headers).then(
+                this.$http.get(this.url + '/api/hupu/userpost/' + page + '?sortby=' + this.sortby, this.headers).then(
                     (res) => {
                         this.data = res.data.data;
                         this.len = res.data.pages;
-                        if(!this.len){
+                        if (!this.len) {
                             this.none_data_key = true
                         }
                         if (!this.max_page[0]) {
@@ -192,28 +222,28 @@
                 this.key = false;
             },
             //上一页
-            pre_page(){
+            pre_page() {
                 this.page_show -= 10;
             },
             //下一页
-            next_page(){
+            next_page() {
                 this.page_show += 10;
             },
             //首页
-            first_page(){
+            first_page() {
                 this.page_show = 10;
                 this.change_Bg(0);
             },
             //尾页
-            last_page(){
+            last_page() {
                 let len = this.max_page.length;
-                this.page_show = len-len%10+10;
-                this.change_Bg(len-1);
+                this.page_show = len - len % 10 + 10;
+                this.change_Bg(len - 1);
             }
 
         },
         watch: {
-            
+
         },
         //页面初始化
         created() {
@@ -268,6 +298,33 @@
         height: 25px;
         margin-top: 1px;
         vertical-align: text-bottom;
+    }
+
+    .sort_list {
+        margin-top: 20px;
+        margin-left: 10px;
+    }
+
+    .sort_list div {
+        display: inline-block;
+        background: #fff;
+        padding: 5px;
+        box-shadow: 2px 2px 6px gray;
+        border-radius: 3px;
+        cursor: pointer;
+        margin-right: 5px;
+    }
+
+    .sort_list img {
+        margin-left: 3px;
+        width: 13px;
+        height: 15px;
+        vertical-align: middle
+    }
+
+    /* 当前排序方式高亮 */
+    .sort_list .active {
+        background: #FC9D99;
     }
 
     .box {
@@ -415,12 +472,13 @@
         background: transparent;
         margin-top: 10px;
     }
+
     .page_controller button,
-    .a_button{
+    .a_button {
         display: inline-block;
         width: 70px;
         height: 30px;
-        background:#acdae9;
+        background: #acdae9;
         border: 1px solid firebrick;
         text-align: center;
         line-height: 30px;
@@ -428,10 +486,12 @@
         cursor: pointer;
         outline: none;
     }
-    .page_controller .next_page{
+
+    .page_controller .next_page {
         margin-left: 10px;
     }
-    #none_data{
+
+    #none_data {
         display: block;
         margin: 200px auto;
         font-size: 30px;

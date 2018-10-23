@@ -1,5 +1,16 @@
 <template>
     <div>
+        <div class="sort_list" v-if="!none_data_key">
+            <div @click=sortDefault :class="{active:sortby=='default'}">
+                <span>默认</span><img src="../assets/sort.png">
+            </div>
+            <div @click=sortPlay :class="{active:sortby=='play'}">
+                <span>播放量</span><img src="../assets/sort.png">
+            </div>
+            <div @click=sortEndTime :class="{active:sortby=='end_time'}">
+                <span>截止时间</span><img src="../assets/sort.png">
+            </div>
+        </div>
         <div class="box">
             <div class="box_item" v-for="(item, index) in data" :key="index">
                 <a :href=item.arcurl target="_blank">
@@ -89,12 +100,30 @@
                 },
                 item: {},
                 //当前模块
-                module: 'video'
+                module: 'video',
+                //排序方式
+                sortby: 'default'
             }
         },
         methods: {
+            //排序
+            sortDefault() {
+                this.sortby = 'default'
+                this.get_page(1);
+                this.lighted = 0;
+            },
+            sortPlay() {
+                this.sortby = 'play'
+                this.get_page(1);
+                this.lighted = 0;
+            },
+            sortEndTime() {
+                this.sortby = 'end_time';
+                this.get_page(1);
+                this.lighted = 0;
+            },
             get_page(page) {
-                this.$http.get(this.url + '/api/bilibili/uservideo/' + page, this.headers).then(
+                this.$http.get(this.url + '/api/bilibili/uservideo/' + page + '?sortby=' + this.sortby, this.headers).then(
                     (res) => {
                         this.data = res.data.data;
                         this.len = res.data.pages;
@@ -191,6 +220,32 @@
 
 
 <style scoped>
+    .sort_list {
+        margin-left: 10px;
+    }
+
+    .sort_list div {
+        display: inline-block;
+        background: #dddddd;
+        padding: 5px;
+        box-shadow: 1px 1px 6px white;
+        border-radius: 3px;
+        cursor: pointer;
+        margin-right: 5px;
+    }
+
+    .sort_list img {
+        margin-left: 3px;
+        width: 13px;
+        height: 15px;
+        vertical-align: middle
+    }
+
+    /* 当前排序方式高亮 */
+    .sort_list .active {
+        background: #FC9D99;
+    }
+
     .box {
         display: flex;
         width: 100%;
@@ -202,7 +257,6 @@
     .box_item {
         box-sizing: border-box;
         width: 48%;
-        /* height: 270px; */
         border: 1px solid #f5f5f5;
         border-radius: 3px;
         margin: 9px;
