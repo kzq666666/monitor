@@ -1,5 +1,5 @@
 <script>
-    const url = 'http://139.199.66.15:8000';
+    const url = 'https://api.ncu204.com';
     const headers = {
         headers:{'Authorization':window.sessionStorage.token}
     };
